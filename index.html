@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Book Your Slot — Agla Number</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #00897B;
+      --teal-dark: #00695C;
+      --teal-light: #E0F2F1;
+      --amber: #F59E0B;
+      --bg: #F4FAF9;
+      --white: #ffffff;
+      --text: #1A2E2B;
+      --muted: #607D79;
+      --border: #CFE8E5;
+      --error: #E53935;
+      --success: #2E7D32;
+      --radius: 16px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 0 40px 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      width: 100%;
+      background: var(--teal);
+      padding: 20px 24px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -20px;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -10px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .header-logo {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .header-salon {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .header-tag {
+      display: inline-block;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Queue status pill ── */
+    .queue-pill {
+      margin: 20px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,137,123,0.08);
+    }
+
+    .queue-pill .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+      flex-shrink: 0;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .queue-pill .queue-text {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .queue-pill .queue-count {
+      margin-left: auto;
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--teal);
+    }
+
+    /* ── Card ── */
+    .card {
+      margin: 16px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      padding: 24px 20px;
+      box-shadow: 0 4px 20px rgba(0,137,123,0.08);
+    }
+
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    /* ── Form ── */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,137,123,0.12);
+      background: var(--white);
+    }
+
+    .field input::placeholder { color: #aaa; }
+
+    /* ── Button ── */
+    .btn-book {
+      width: 100%;
+      padding: 16px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-book:hover { background: var(--teal-dark); }
+    .btn-book:active { transform: scale(0.98); }
+    .btn-book:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    /* ── Error / info messages ── */
+    .msg {
+      margin: 12px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .msg.error {
+      background: #FFEBEE;
+      color: var(--error);
+      border: 1px solid #FFCDD2;
+    }
+
+    .msg.info {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+      border: 1px solid var(--border);
+    }
+
+    .msg.show { display: block; }
+
+    /* ── Success screen ── */
+    .success-screen {
+      display: none;
+      margin: 20px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      text-align: center;
+    }
+
+    .success-screen.show { display: block; }
+
+    .success-icon {
+      width: 80px; height: 80px;
+      background: #E8F5E9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 36px;
+    }
+
+    .success-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--success);
+      margin-bottom: 8px;
+    }
+
+    .success-sub {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .position-badge {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      width: 100px; height: 100px;
+      line-height: 100px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+    }
+
+    .position-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+      padding: 6px 0;
+      font-weight: 500;
+    }
+
+    .info-row + .info-row {
+      border-top: 1px solid var(--border);
+    }
+
+    .info-row span.icon { font-size: 18px; }
+
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* ── Closed state ── */
+    .closed-screen {
+      display: none;
+      margin: 20px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      text-align: center;
+    }
+    .closed-screen.show { display: block; }
+    .closed-icon { font-size: 56px; margin-bottom: 12px; }
+    .closed-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--error);
+      margin-bottom: 8px;
+    }
+    .closed-sub { font-size: 15px; color: var(--muted); }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-screen {
+      margin: 60px auto 0;
+      text-align: center;
+      color: var(--muted);
+    }
+    .loading-screen .spinner {
+      border-color: rgba(0,137,123,0.3);
+      border-top-color: var(--teal);
+      width: 32px; height: 32px;
+      border-width: 3px;
+      display: block;
+      margin: 0 auto 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">✂️ Agla Number</div>
+    <div class="header-salon" id="salonNameHeader">Loading...</div>
+    <span class="header-tag">Scan · Book · Relax</span>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    Loading salon info...
+  </div>
+
+  <!-- Closed -->
+  <div class="closed-screen" id="closedScreen">
+    <div class="closed-icon">🚪</div>
+    <div class="closed-title">Salon is Closed</div>
+    <div class="closed-sub">Please visit during working hours and scan again.</div>
+  </div>
+
+  <!-- Queue pill -->
+  <div class="queue-pill" id="queuePill" style="display:none;">
+    <div class="dot"></div>
+    <div class="queue-text">Currently waiting</div>
+    <div class="queue-count" id="queueCount">—</div>
+  </div>
+
+  <!-- Error msg -->
+  <div class="msg error" id="errorMsg"></div>
+
+  <!-- Booking form -->
+  <div class="card" id="bookingCard" style="display:none;">
+    <div class="card-title">Book Your Slot 💈</div>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="name" />
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="phoneInput" placeholder="Enter your phone number" autocomplete="tel" />
+    </div>
+
+    <button class="btn-book" id="bookBtn" onclick="bookSlot()">
+      Book My Slot
+    </button>
+  </div>
+
+  <!-- Success screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✅</div>
+    <div class="success-title">You're Booked!</div>
+    <div class="success-sub">Show this screen to the staff if needed.</div>
+
+    <div class="position-badge" id="positionBadge">—</div>
+    <div class="position-label">Your Queue Number</div>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="icon">✂️</span>
+        <span id="successSalonName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="icon">👤</span>
+        <span id="successName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="icon">📱</span>
+        <span id="successPhone">—</span>
+      </div>
+      <div class="info-row">
+        <span class="icon">⏳</span>
+        <span id="successAhead">—</span>
+      </div>
+    </div>
+
+    <p class="note">
+      Please stay nearby. The barber will call you when it's your turn.<br>
+      You can show this screen as your token.
+    </p>
+  </div>
+
+  <script>
+    // ── CONFIG ────────────────────────────────────────────────────────────────
+    const SUPABASE_URL = 'https://qmuohiboqxsrtoqwuuhs.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtdW9oaWJvcXhzcnRvcXd1dWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTEwNjYsImV4cCI6MjA5MjIyNzA2Nn0.H9HKaYuYUVkCf92qDG-NanPUZpci9FpYEPxrBjT2dgw';
+
+    // ── Get salon ID from URL: ?salon=SALON_ID ────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const SALON_ID = params.get('salon');
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let salonName = '';
+    let salonPhone = '';
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    async function init() {
+      if (!SALON_ID) {
+        showError('Invalid QR code. No salon ID found.');
+        hide('loadingScreen');
+        return;
+      }
+
+      try {
+        // Fetch salon info
+        const { data: salon, error } = await supabase
+          .from('salons')
+          .select('shop_name, is_open, phone, owner_phone, landmark')
+          .eq('id', SALON_ID)
+          .single();
+
+        hide('loadingScreen');
+
+        if (error || !salon) {
+          showError('Salon not found. Please scan the QR code again.');
+          return;
+        }
+
+        salonName = salon.shop_name || 'Our Salon';
+        salonPhone = salon.phone || salon.owner_phone || '';
+
+        document.getElementById('salonNameHeader').textContent = salonName;
+        document.title = `Book at ${salonName} — Agla Number`;
+
+        if (!salon.is_open) {
+          show('closedScreen');
+          return;
+        }
+
+        // Fetch active queue count
+        await refreshQueueCount();
+
+        show('queuePill');
+        show('bookingCard');
+
+        // Auto-refresh queue count every 10 seconds
+        setInterval(refreshQueueCount, 10000);
+
+      } catch (e) {
+        hide('loadingScreen');
+        showError('Something went wrong. Please try again.');
+        console.error(e);
+      }
+    }
+
+    async function refreshQueueCount() {
+      try {
+        const { data: queue } = await supabase
+          .from('queue')
+          .select('id, status, completion_status')
+          .eq('salon_id', SALON_ID);
+
+        const active = (queue || []).filter(q => {
+          const st = q.status || '';
+          const cs = q.completion_status || '';
+          return st !== 'cancelled' && st !== 'completed' &&
+                 cs !== 'cancelled' && cs !== 'completed';
+        });
+
+        document.getElementById('queueCount').textContent =
+          active.length === 0 ? 'No wait 🎉' : `${active.length} waiting`;
+      } catch (_) {}
+    }
+
+    // ── Book slot ─────────────────────────────────────────────────────────────
+    async function bookSlot() {
+      const name = document.getElementById('nameInput').value.trim();
+      const phone = document.getElementById('phoneInput').value.trim();
+
+      if (!name) {
+        showError('Please enter your name.');
+        return;
+      }
+      if (!phone) {
+        showError('Please enter your phone number.');
+        return;
+      }
+      if (phone.length < 7) {
+        showError('Please enter a valid phone number.');
+        return;
+      }
+
+      hideError();
+
+      const btn = document.getElementById('bookBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Booking...';
+
+      try {
+        // Check if already booked
+        const { data: existing } = await supabase
+          .from('queue')
+          .select('id, token_number')
+          .eq('customer_phone', phone)
+          .eq('salon_id', SALON_ID)
+          .eq('completion_status', 'pending')
+          .maybeSingle();
+
+        if (existing) {
+          showError('You already have an active booking at this salon!');
+          btn.disabled = false;
+          btn.innerHTML = 'Book My Slot';
+          return;
+        }
+
+        // Get next token number
+        const { data: latestQueue } = await supabase
+          .from('queue')
+          .select('token_number')
+          .eq('salon_id', SALON_ID)
+          .order('token_number', { ascending: false })
+          .limit(1);
+
+        const nextToken = latestQueue && latestQueue.length > 0
+          ? latestQueue[0].token_number + 1
+          : 1;
+
+        // Count active people ahead
+        const { data: activeQueue } = await supabase
+          .from('queue')
+          .select('id, status, completion_status')
+          .eq('salon_id', SALON_ID);
+
+        const peopleAhead = (activeQueue || []).filter(q => {
+          const st = q.status || '';
+          const cs = q.completion_status || '';
+          return st !== 'cancelled' && st !== 'completed' &&
+                 cs !== 'cancelled' && cs !== 'completed';
+        }).length;
+
+        // Insert into queue
+        const { data: newRow, error: insertError } = await supabase
+          .from('queue')
+          .insert({
+            salon_id: SALON_ID,
+            customer_name: name,
+            customer_phone: phone,
+            token_number: nextToken,
+            status: 'waiting',
+            completion_status: 'pending',
+            joined_at: new Date().toISOString(),
+            people_ahead_at_booking: peopleAhead,
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        // Show success
+        showSuccess({
+          name,
+          phone,
+          token: nextToken,
+          ahead: peopleAhead,
+        });
+
+      } catch (e) {
+        showError('Booking failed. Please try again.');
+        console.error(e);
+        btn.disabled = false;
+        btn.innerHTML = 'Book My Slot';
+      }
+    }
+
+    function showSuccess({ name, phone, token, ahead }) {
+      hide('bookingCard');
+      hide('queuePill');
+      hideError();
+
+      document.getElementById('positionBadge').textContent = token;
+      document.getElementById('successSalonName').textContent = salonName;
+      document.getElementById('successName').textContent = name;
+      document.getElementById('successPhone').textContent = phone;
+      document.getElementById('successAhead').textContent =
+        ahead === 0 ? 'No one waiting — you\'re next!' : `${ahead} person${ahead > 1 ? 's' : ''} ahead of you`;
+
+      show('successScreen');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('errorMsg').classList.remove('show');
+    }
+
+    function show(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    }
+
+    function hide(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+
+    // ── Start ─────────────────────────────────────────────────────────────────
+    init();
+  </script>
+</body>
+</html>
