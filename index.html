@@ -479,7 +479,7 @@
     const params = new URLSearchParams(window.location.search);
     const SALON_ID = params.get('salon');
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let salonName = '';
     let salonPhone = '';
@@ -494,7 +494,7 @@
 
       try {
         // Fetch salon info
-        const { data: salon, error } = await supabase
+        const { data: salon, error } = await db
           .from('salons')
           .select('shop_name, is_open, phone, owner_phone, landmark')
           .eq('id', SALON_ID)
@@ -536,7 +536,7 @@
 
     async function refreshQueueCount() {
       try {
-        const { data: queue } = await supabase
+        const { data: queue } = await db
           .from('queue')
           .select('id, status, completion_status')
           .eq('salon_id', SALON_ID);
@@ -579,7 +579,7 @@
 
       try {
         // Check if already booked
-        const { data: existing } = await supabase
+        const { data: existing } = await db
           .from('queue')
           .select('id, token_number')
           .eq('customer_phone', phone)
@@ -595,7 +595,7 @@
         }
 
         // Get next token number
-        const { data: latestQueue } = await supabase
+        const { data: latestQueue } = await db
           .from('queue')
           .select('token_number')
           .eq('salon_id', SALON_ID)
@@ -607,7 +607,7 @@
           : 1;
 
         // Count active people ahead
-        const { data: activeQueue } = await supabase
+        const { data: activeQueue } = await db
           .from('queue')
           .select('id, status, completion_status')
           .eq('salon_id', SALON_ID);
@@ -620,7 +620,7 @@
         }).length;
 
         // Insert into queue
-        const { data: newRow, error: insertError } = await supabase
+        const { data: newRow, error: insertError } = await db
           .from('queue')
           .insert({
             salon_id: SALON_ID,
