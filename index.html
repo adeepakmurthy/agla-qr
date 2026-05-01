@@ -794,9 +794,21 @@
       document.getElementById('errorMsg').classList.remove('show');
     }
 
+    // Explicit display values per element type
+    const DISPLAY_MAP = {
+      'queuePill': 'flex',
+      'bookingCard': 'block',
+      'successScreen': 'block',
+      'liveSection': 'block',
+      'doneBanner': 'block',
+      'closedScreen': 'block',
+      'loadingScreen': 'block',
+      'errorMsg': 'block',
+    };
+
     function show(id) {
       const el = document.getElementById(id);
-      if (el) el.style.display = '';
+      if (el) el.style.display = DISPLAY_MAP[id] || 'block';
     }
 
     function hide(id) {
