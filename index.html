@@ -6,7 +6,7 @@
   <title>Book Your Slot — Agla Number</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -479,7 +479,7 @@
     const params = new URLSearchParams(window.location.search);
     const SALON_ID = params.get('salon');
 
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let salonName = '';
     let salonPhone = '';
@@ -496,7 +496,7 @@
         // Fetch salon info
         const { data: salon, error } = await db
           .from('salons')
-          .select('shop_name, is_open, phone, owner_phone, landmark')
+          .select('shop_name, is_open, owner_phone, landmark')
           .eq('id', SALON_ID)
           .single();
 
@@ -508,7 +508,7 @@
         }
 
         salonName = salon.shop_name || 'Our Salon';
-        salonPhone = salon.phone || salon.owner_phone || '';
+        salonPhone = salon.owner_phone || '';
 
         document.getElementById('salonNameHeader').textContent = salonName;
         document.title = `Book at ${salonName} — Agla Number`;
