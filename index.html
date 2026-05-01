@@ -383,6 +383,101 @@
       display: block;
       margin: 0 auto 16px;
     }
+
+    /* ── Live tracking section ── */
+    .live-section {
+      margin: 16px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+    }
+
+    .live-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,137,123,0.08);
+      text-align: center;
+    }
+
+    .live-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .live-position-number {
+      font-family: 'Sora', sans-serif;
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+      transition: color 0.4s;
+    }
+
+    .live-position-number.your-turn { color: #2E7D32; }
+    .live-position-number.next { color: var(--amber); }
+    .live-position-number.waiting { color: var(--teal); }
+
+    .live-ahead {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .live-banner {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .live-banner.turn { background: #E8F5E9; color: #2E7D32; }
+    .live-banner.next { background: #FFF8E1; color: #F57F17; }
+    .live-banner.wait { background: var(--teal-light); color: var(--teal-dark); }
+
+    .live-refresh {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .done-banner {
+      background: #E8F5E9;
+      border: 1.5px solid #A5D6A7;
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      margin: 16px auto 0;
+      width: calc(100% - 40px);
+      max-width: 440px;
+    }
+
+    .done-banner .done-icon { font-size: 40px; margin-bottom: 8px; }
+    .done-banner .done-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2E7D32;
+      margin-bottom: 4px;
+    }
+    .done-banner .done-sub { font-size: 14px; color: #4CAF50; }
   </style>
 </head>
 <body>
@@ -468,6 +563,27 @@
       Please stay nearby. The barber will call you when it's your turn.<br>
       You can show this screen as your token.
     </p>
+  </div>
+
+  <!-- Live position tracking (shown after booking) -->
+  <div class="live-section" id="liveSection" style="display:none;">
+    <div class="live-card">
+      <div class="live-label">📍 Your Live Position</div>
+      <div class="live-position-number waiting" id="livePosNumber">—</div>
+      <div class="live-ahead" id="liveAheadText">Calculating...</div>
+      <div class="live-banner wait" id="liveBanner">Loading your position...</div>
+      <div class="live-refresh">
+        <div class="live-dot"></div>
+        <span>Updates every 10 seconds</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service done banner -->
+  <div class="done-banner" id="doneBanner" style="display:none;">
+    <div class="done-icon">✅</div>
+    <div class="done-title">Service Complete!</div>
+    <div class="done-sub">Thank you for visiting. See you again!</div>
   </div>
 
   <script>
@@ -690,6 +806,84 @@
 
     // ── Start ─────────────────────────────────────────────────────────────────
     init();
+
+    // ── Live position tracking ────────────────────────────────────────────────
+    let myBookingPhone = '';
+    let myTokenNumber = 0;
+    let liveInterval = null;
+
+    function startLiveTracking(phone, token) {
+      myBookingPhone = phone;
+      myTokenNumber = token;
+      show('liveSection');
+      updateLivePosition(); // immediate first update
+      liveInterval = setInterval(updateLivePosition, 10000);
+    }
+
+    async function updateLivePosition() {
+      try {
+        // Fetch active queue
+        const { data: queue } = await db
+          .from('queue')
+          .select('id, customer_phone, status, completion_status, joined_at, token_number')
+          .eq('salon_id', SALON_ID)
+          .order('token_number', { ascending: true });
+
+        if (!queue) return;
+
+        // Check if my row still exists
+        const myRow = queue.find(q => q.customer_phone === myBookingPhone);
+
+        if (!myRow) {
+          // Row deleted = service complete
+          clearInterval(liveInterval);
+          hide('liveSection');
+          hide('successScreen');
+          show('doneBanner');
+          return;
+        }
+
+        // Filter active queue
+        const activeQueue = queue.filter(q => {
+          const st = q.status || '';
+          const cs = q.completion_status || '';
+          return st !== 'cancelled' && st !== 'completed' &&
+                 cs !== 'cancelled' && cs !== 'completed';
+        });
+
+        // My position in active queue
+        const myIndex = activeQueue.findIndex(q => q.customer_phone === myBookingPhone);
+        const position = myIndex + 1;
+        const ahead = myIndex;
+
+        // Update UI
+        const posEl = document.getElementById('livePosNumber');
+        const aheadEl = document.getElementById('liveAheadText');
+        const bannerEl = document.getElementById('liveBanner');
+
+        posEl.textContent = position;
+
+        if (position === 1) {
+          posEl.className = 'live-position-number your-turn';
+          aheadEl.textContent = 'You are next!';
+          bannerEl.textContent = '🎉 YOUR TURN — Please go to the chair!';
+          bannerEl.className = 'live-banner turn';
+        } else if (position === 2) {
+          posEl.className = 'live-position-number next';
+          aheadEl.textContent = '1 person ahead of you';
+          bannerEl.textContent = '⚡ Get ready — head to the salon now!';
+          bannerEl.className = 'live-banner next';
+        } else {
+          posEl.className = 'live-position-number waiting';
+          aheadEl.textContent = `${ahead} people ahead of you`;
+          bannerEl.textContent = `🪑 Relax — ${ahead} people before you`;
+          bannerEl.className = 'live-banner wait';
+        }
+
+      } catch (e) {
+        console.error('Live tracking error:', e);
+      }
+    }
   </script>
 </body>
 </html>
